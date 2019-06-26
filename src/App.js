@@ -1,46 +1,50 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import {DragDropContext} from 'react-beautiful-dnd';
-import initialData from './initial-data';
-import Column from './column';
-import '@atlaskit/css-reset';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import { DragDropContext } from "react-beautiful-dnd";
+import initialData from "./initial-data";
+import Column from "./column";
+import "@atlaskit/css-reset";
 
-import styled from 'styled-components';
+import styled from "styled-components";
+
+import firebase from "./firebase/firebase.js";
 //example of the result object
+
+const firebaseActions = new firebase();
 
 //ondragend
 const result = {
-  draggableId: 'task-1',
-  type: 'TYPE',
-  reason: 'DROP',
+  draggableId: "task-1",
+  type: "TYPE",
+  reason: "DROP",
   source: {
-    draggableId: 'column-1',
-    index: 0,
+    draggableId: "column-1",
+    index: 0
   },
   destination: {
-    draggableId: 'column-1',
-    index: 1,
-  },
+    draggableId: "column-1",
+    index: 1
+  }
 };
 
 //ondragstart
 const start = {
-  draggableId: 'task-1',
-  type: 'TYPE',
+  draggableId: "task-1",
+  type: "TYPE",
   source: {
-    droppableId: 'column-1',
-    index: 0,
-  },
+    droppableId: "column-1",
+    index: 0
+  }
 };
 
 //ondragupdate
 const update = {
   ...start,
   destination: {
-    droppableId: 'column-1',
-    index: 1,
-  },
+    droppableId: "column-1",
+    index: 1
+  }
 };
 
 const Container = styled.div`
@@ -51,21 +55,21 @@ class App extends React.Component {
   state = initialData;
 
   onDragStart = () => {
-    document.body.style.color = 'orange';
-    document.body.style.transition = 'background-color 0.2s ease';
+    document.body.style.color = "orange";
+    document.body.style.transition = "background-color 0.2s ease";
   };
 
   onDragUpdate = update => {
-    const {destination} = update;
+    const { destination } = update;
     const opacity = destination
-      ? destination.index / Object.keys (this.state.tasks).length
+      ? destination.index / Object.keys(this.state.tasks).length
       : 0;
     document.body.style.backgroundColor = `rgba(153, 141, 217, ${opacity})`;
   };
 
   onDragEnd = result => {
-    document.body.style.color = 'black';
-    const {destination, source, draggableId} = result;
+    document.body.style.color = "black";
+    const { destination, source, draggableId } = result;
     if (!destination) {
       return;
     }
@@ -78,39 +82,39 @@ class App extends React.Component {
     const start = this.state.columns[source.droppableId]; //source column
     const finish = this.state.columns[destination.droppableId];
 
-    if (finish.id === 'column-0') {
+    if (finish.id === "column-0") {
       return;
     }
 
     if (start === finish) {
-      const newTaskIds = Array.from (start.taskIds);
-      newTaskIds.splice (source.index, 1);
-      newTaskIds.splice (destination.index, 0, draggableId);
+      const newTaskIds = Array.from(start.taskIds);
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggableId);
       const newColumn = {
         ...start,
-        taskIds: newTaskIds,
+        taskIds: newTaskIds
       };
       const newState = {
         ...this.state,
         columns: {
           ...this.state.columns,
-          [newColumn.id]: newColumn,
-        },
+          [newColumn.id]: newColumn
+        }
       };
-      this.setState (newState);
+      this.setState(newState);
     } else {
-      const startTasksIds = Array.from (start.taskIds);
-      startTasksIds.splice (source.index, 1);
+      const startTasksIds = Array.from(start.taskIds);
+      startTasksIds.splice(source.index, 1);
       const startColumn = {
         ...start,
-        taskIds: startTasksIds,
+        taskIds: startTasksIds
       };
 
-      const finishTasksIds = Array.from (finish.taskIds);
-      finishTasksIds.splice (destination.index, 0, draggableId);
+      const finishTasksIds = Array.from(finish.taskIds);
+      finishTasksIds.splice(destination.index, 0, draggableId);
       const finishColumn = {
         ...finish,
-        taskIds: finishTasksIds,
+        taskIds: finishTasksIds
       };
 
       const newState = {
@@ -118,14 +122,14 @@ class App extends React.Component {
         columns: {
           ...this.state.columns,
           [startColumn.id]: startColumn,
-          [finishColumn.id]: finishColumn,
-        },
+          [finishColumn.id]: finishColumn
+        }
       };
-      this.setState (newState);
+      this.setState(newState, () => firebaseActions.saveGoals(this.state));
     }
   };
 
-  render () {
+  render() {
     return (
       <DragDropContext
         onDragStart={this.onDragStart}
@@ -133,21 +137,20 @@ class App extends React.Component {
         onDragUpdate={this.onDragUpdate}
       >
         <Column
-          column={this.state.columns['column-0']}
-          tasks={this.state.columns['column-0'].taskIds.map (
+          column={this.state.columns["column-0"]}
+          tasks={this.state.columns["column-0"].taskIds.map(
             taskId => this.state.tasks[taskId]
           )}
         />
         <Container>
-          {this.state.columnOrder.map (columnId => {
+          {this.state.columnOrder.map(columnId => {
             const column = this.state.columns[columnId];
-            const tasks = column.taskIds.map (
+            const tasks = column.taskIds.map(
               taskId => this.state.tasks[taskId]
             );
             return <Column key={column.id} column={column} tasks={tasks} />;
           })}
         </Container>
-
       </DragDropContext>
     );
   }
