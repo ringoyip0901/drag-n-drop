@@ -78,6 +78,10 @@ class App extends React.Component {
     const start = this.state.columns[source.droppableId]; //source column
     const finish = this.state.columns[destination.droppableId];
 
+    if (finish.id === 'column-0') {
+      return;
+    }
+
     if (start === finish) {
       const newTaskIds = Array.from (start.taskIds);
       newTaskIds.splice (source.index, 1);
@@ -120,6 +124,7 @@ class App extends React.Component {
       this.setState (newState);
     }
   };
+
   render () {
     return (
       <DragDropContext
@@ -127,6 +132,12 @@ class App extends React.Component {
         onDragEnd={this.onDragEnd}
         onDragUpdate={this.onDragUpdate}
       >
+        <Column
+          column={this.state.columns['column-0']}
+          tasks={this.state.columns['column-0'].taskIds.map (
+            taskId => this.state.tasks[taskId]
+          )}
+        />
         <Container>
           {this.state.columnOrder.map (columnId => {
             const column = this.state.columns[columnId];
