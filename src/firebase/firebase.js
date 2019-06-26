@@ -3,9 +3,9 @@ const firebase = require("firebase");
 require("firebase/firestore");
 // Initialize Cloud Firestore through Firebase
 firebase.initializeApp({
-  apiKey: "AIzaSyAjIbLzamlvl6wGYHTowQ32lHZnD8hLPP8",
-  authDomain: "witsmo-web-app.firebaseapp.com",
-  projectId: "witsmo-web-app"
+  apiKey: "",
+  authDomain: "",
+  projectId: ""
 });
 
 var db = firebase.firestore();
